@@ -46,6 +46,16 @@ export function isObject(obj: mixed): boolean %checks {
 /**
  * Get the raw type string of a value, e.g., [object Object].
  * 看注释懂了 这样的就获取到了Object了
+ * 可以通过toString() 来获取每个对象的类型。
+ * 为了每个对象都能通过 Object.prototype.toString() 来检测，
+ * 需要以 Function.prototype.call() 或者 Function.prototype.apply() 的形式来调用，传递要检查的对象作为第一个参数，称为thisArg。
+ * var toString = Object.prototype.toString;
+ * toString.call(new Date); // [object Date]
+ * toString.call(new String); // [object String]
+ * toString.call(Math); // [object Math]
+ * //Since JavaScript 1.8.5
+ * toString.call(undefined); // [object Undefined]
+ * toString.call(null); // [object Null]
  */
 const _toString = Object.prototype.toString;
 
@@ -124,16 +134,19 @@ export function makeMap(
 
 /**
  * Check if a tag is a built-in tag.
+ * 检查标签是否为内置标签
  */
 export const isBuiltInTag = makeMap('slot,component', true);
 
 /**
  * Check if an attribute is a reserved attribute.
+ * 检查属性是否为保留属性。
  */
 export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is');
 
 /**
  * Remove an item from an array.
+ * 从数组中删除item。
  */
 export function remove(arr: Array<any>, item: any): Array<any> | void {
   if (arr.length) {
@@ -146,6 +159,7 @@ export function remove(arr: Array<any>, item: any): Array<any> | void {
 
 /**
  * Check whether an object has the property.
+ * hasOwnProperty() 方法会返回一个布尔值，指示对象自身属性中是否具有指定的属性
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 export function hasOwn(obj: Object | Array<*>, key: string): boolean {
@@ -154,6 +168,7 @@ export function hasOwn(obj: Object | Array<*>, key: string): boolean {
 
 /**
  * Create a cached version of a pure function.
+ * 创建纯函数的缓存
  */
 export function cached<F: Function>(fn: F): F {
   const cache = Object.create(null);
@@ -165,6 +180,9 @@ export function cached<F: Function>(fn: F): F {
 
 /**
  * Camelize a hyphen-delimited string.
+ * 按照-首字母大写
+ * camelize('hhh-aaa-ddd-fff') ===>  "hhhAaaDddFff"
+ * 中划线转驼峰
  */
 const camelizeRE = /-(\w)/g;
 export const camelize = cached(
@@ -175,6 +193,8 @@ export const camelize = cached(
 
 /**
  * Capitalize a string.
+ * 字符串首字母大写
+ * capitalize("sdfhsdlfjiufsd") ==> "Sdfhsdlfjiufsd"
  */
 export const capitalize = cached(
   (str: string): string => {
@@ -184,6 +204,8 @@ export const capitalize = cached(
 
 /**
  * Hyphenate a camelCase string.
+ * 驼峰转中划线
+ * hyphenate('aBaaCaaDaa') ==> "a-baa-caa-daa"
  */
 const hyphenateRE = /\B([A-Z])/g;
 export const hyphenate = cached(
