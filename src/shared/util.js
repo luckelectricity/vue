@@ -38,6 +38,7 @@ export function isPrimitive(value: any): boolean %checks {
  * Quick object check - this is primarily used to tell
  * Objects from primitive values when we know the value
  * is a JSON-compliant type.
+ * 除了null以外的所有对象,数组 包括new出来的所有的对象都会返回true
  */
 export function isObject(obj: mixed): boolean %checks {
   return obj !== null && typeof obj === 'object';
@@ -220,9 +221,11 @@ export const hyphenate = cached(
  * since native bind is now performant enough in most browsers.
  * But removing it would mean breaking code that was able to run in
  * PhantomJS 1.x, so this must be kept for backward compatibility.
+ * polyfill 为了兼容
  */
 
 /* istanbul ignore next */
+// 用call和apply模拟bind
 function polyfillBind(fn: Function, ctx: Object): Function {
   function boundFn(a) {
     const l = arguments.length;
@@ -237,6 +240,7 @@ function polyfillBind(fn: Function, ctx: Object): Function {
   return boundFn;
 }
 
+// 原生bind
 function nativeBind(fn: Function, ctx: Object): Function {
   return fn.bind(ctx);
 }
@@ -245,6 +249,7 @@ export const bind = Function.prototype.bind ? nativeBind : polyfillBind;
 
 /**
  * Convert an Array-like object to a real Array.
+ * 将伪数组转换为数组,start为从哪一位开始
  */
 export function toArray(list: any, start?: number): Array<any> {
   start = start || 0;
@@ -258,6 +263,7 @@ export function toArray(list: any, start?: number): Array<any> {
 
 /**
  * Mix properties into target object.
+ * 合并两个obj
  */
 export function extend(to: Object, _from: ?Object): Object {
   for (const key in _from) {
@@ -268,6 +274,8 @@ export function extend(to: Object, _from: ?Object): Object {
 
 /**
  * Merge an Array of Objects into a single Object.
+ * [{a:1}, {b: 2}]
+ * return {a:1,b:2}
  */
 export function toObject(arr: Array<any>): Object {
   const res = {};
@@ -285,11 +293,13 @@ export function toObject(arr: Array<any>): Object {
  * Perform no operation.
  * Stubbing args to make Flow happy without leaving useless transpiled code
  * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/).
+ * 啥也不做
  */
 export function noop(a?: any, b?: any, c?: any) {}
 
 /**
  * Always return false.
+ * 总返回false
  */
 export const no = (a?: any, b?: any, c?: any) => false;
 
@@ -297,12 +307,29 @@ export const no = (a?: any, b?: any, c?: any) => false;
 
 /**
  * Return the same value.
+ * 返回相同的值
  */
 export const identity = (_: any) => _;
 
 /**
  * Generate a string containing static keys from compiler modules.
  */
+// 下面是modules的大概格式
+// [
+//   {
+//     staticKeys: ['staticClass'],
+//     transformNode,
+//     genData
+//   },
+//   {
+//     staticKeys: ['staticStyle'],
+//     transformNode,
+//     genData
+//   },
+//   {
+//     preTransformNode
+//   }
+// ]
 export function genStaticKeys(modules: Array<ModuleOptions>): string {
   return modules
     .reduce((keys, m) => {
@@ -314,6 +341,8 @@ export function genStaticKeys(modules: Array<ModuleOptions>): string {
 /**
  * Check if two values are loosely equal - that is,
  * if they are plain objects, do they have the same shape?
+ * 检查两个值是否宽松相等 -也就是说，如果它们是普通对象，它们是否具有相同的格式,
+ * 具体可以参考有道云笔记里面vue源码的流程图
  */
 export function looseEqual(a: any, b: any): boolean {
   if (a === b) return true;
@@ -360,6 +389,9 @@ export function looseEqual(a: any, b: any): boolean {
  * Return the first index at which a loosely equal value can be
  * found in the array (if value is a plain object, the array must
  * contain an object of the same shape), or -1 if it is not present.
+ * 返回第一个索引，在该索引处可以在数组中找到松散相等的值（如果value是普通对象，
+ * 则数组必须包含相同形状的对象），如果不存在，则返回-1。
+ * 类似于indexOf
  */
 export function looseIndexOf(arr: Array<mixed>, val: mixed): number {
   for (let i = 0; i < arr.length; i++) {
@@ -370,6 +402,7 @@ export function looseIndexOf(arr: Array<mixed>, val: mixed): number {
 
 /**
  * Ensure a function is called only once.
+ * 确保只调用一次函数
  */
 export function once(fn: Function): Function {
   let called = false;
